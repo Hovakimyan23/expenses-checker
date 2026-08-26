@@ -1,3 +1,3 @@
-# expenses-checker
+This is a program, which help you to check and control your expenses
 
-[![Open in Bolt](https://bolt.new/static/open-in-bolt.svg)](https://bolt.new/~/sb1-4utkhjmh)
+Made by S.Hovakimyan 
