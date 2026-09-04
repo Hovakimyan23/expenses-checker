@@ -9,6 +9,7 @@ import { AuthForm } from '@/components/AuthForm';
 import { ApprovalsView } from '@/components/ApprovalsView';
 import { TeamView } from '@/components/TeamView';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { getInitialTheme, useThemeEffect } from '@/hooks/useTheme';
 import { supabase } from '@/lib/supabase';
@@ -28,6 +29,7 @@ function getStoredMode(): AppMode | null {
 
 function AppContent() {
   const auth = useAuth();
+  const { t } = useSettings();
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
   useThemeEffect(theme);
 
@@ -65,7 +67,6 @@ function AppContent() {
     localStorage.removeItem(MODE_KEY);
   }
 
-  // Load corporate data when authenticated
   const loadCorporateData = useCallback(async () => {
     if (!auth.orgId) return;
     setCLoading(true);
@@ -76,21 +77,21 @@ function AppContent() {
     ]);
 
     if (txRes.data) {
-      setCTransactions(txRes.data.map((t) => ({
-        id: t.id,
-        title: t.title,
-        amount: Number(t.amount),
-        category: t.category,
-        type: t.type,
-        date: t.date,
-        paymentMethod: t.payment_method,
-        note: t.note ?? undefined,
-        status: t.status,
-        user_id: t.user_id,
-        org_id: t.org_id,
-        reviewer_id: t.reviewer_id,
-        reviewed_at: t.reviewed_at,
-        created_at: t.created_at,
+      setCTransactions(txRes.data.map((tx) => ({
+        id: tx.id,
+        title: tx.title,
+        amount: Number(tx.amount),
+        category: tx.category,
+        type: tx.type,
+        date: tx.date,
+        paymentMethod: tx.payment_method,
+        note: tx.note ?? undefined,
+        status: tx.status,
+        user_id: tx.user_id,
+        org_id: tx.org_id,
+        reviewer_id: tx.reviewer_id,
+        reviewed_at: tx.reviewed_at,
+        created_at: tx.created_at,
       })));
     }
 
@@ -112,7 +113,6 @@ function AppContent() {
     }
   }, [mode, auth.orgId, loadCorporateData]);
 
-  // Realtime subscription for corporate transactions
   useEffect(() => {
     if (mode !== 'corporate' || !auth.orgId) return;
 
@@ -141,60 +141,57 @@ function AppContent() {
     };
   }, [mode, auth.orgId, loadCorporateData]);
 
-  // Determine which data set to use
   const isCorporate = mode === 'corporate';
   const transactions = isCorporate ? cTransactions : pTransactions;
   const budgets = isCorporate ? cBudgets : pBudgets;
   const role = isCorporate ? auth.role : null;
 
-  // CRUD operations
   const openAdd = useCallback(() => {
     setEditingTx(null);
     setFormOpen(true);
   }, []);
 
-  const openEdit = useCallback((t: Transaction) => {
-    setEditingTx(t);
+  const openEdit = useCallback((tx: Transaction) => {
+    setEditingTx(tx);
     setFormOpen(true);
   }, []);
 
   const saveTransaction = useCallback(
-    async (t: Transaction) => {
+    async (tx: Transaction) => {
       if (isCorporate && auth.orgId) {
         const payload = {
           org_id: auth.orgId,
-          user_id: t.user_id ?? auth.user?.id,
-          title: t.title,
-          amount: t.amount,
-          category: t.category,
-          type: t.type,
-          date: t.date,
-          payment_method: t.paymentMethod,
-          note: t.note ?? null,
-          status: t.status ?? 'approved',
+          user_id: tx.user_id ?? auth.user?.id,
+          title: tx.title,
+          amount: tx.amount,
+          category: tx.category,
+          type: tx.type,
+          date: tx.date,
+          payment_method: tx.paymentMethod,
+          note: tx.note ?? null,
+          status: tx.status ?? 'approved',
         };
 
-        const exists = cTransactions.some((x) => x.id === t.id);
+        const exists = cTransactions.some((x) => x.id === tx.id);
         if (exists) {
           await supabase.from('transactions').update({
-            title: t.title,
-            amount: t.amount,
-            category: t.category,
-            type: t.type,
-            date: t.date,
-            payment_method: t.paymentMethod,
-            note: t.note ?? null,
-          }).eq('id', t.id);
+            title: tx.title,
+            amount: tx.amount,
+            category: tx.category,
+            type: tx.type,
+            date: tx.date,
+            payment_method: tx.paymentMethod,
+            note: tx.note ?? null,
+          }).eq('id', tx.id);
         } else {
-          // Employees submit as pending; managers/admins auto-approve
           const status = (auth.role === 'admin' || auth.role === 'manager') ? 'approved' : 'pending';
           await supabase.from('transactions').insert({ ...payload, status });
         }
         loadCorporateData();
       } else {
         setPTransactions((prev) => {
-          const exists = prev.some((x) => x.id === t.id);
-          return exists ? prev.map((x) => (x.id === t.id ? t : x)) : [...prev, t];
+          const exists = prev.some((x) => x.id === tx.id);
+          return exists ? prev.map((x) => (x.id === tx.id ? tx : x)) : [...prev, tx];
         });
       }
     },
@@ -283,7 +280,6 @@ function AppContent() {
     [isCorporate, auth.orgId, setPBudgets, loadCorporateData],
   );
 
-  // Render logic
   if (mode === null) {
     return <ModeSelector onSelect={selectMode} />;
   }
@@ -373,8 +369,8 @@ function AppContent() {
 
       <footer className="mx-auto max-w-6xl px-4 pb-8 pt-2 text-center text-xs text-gray-400 dark:text-gray-600 sm:px-6">
         {isCorporate
-          ? `Finch Corporate · ${auth.membership?.org.name ?? ''} · Shared workspace`
-          : 'Finch · Your data is stored locally in your browser.'}
+          ? `Finch ${t('corporate')} · ${auth.membership?.org.name ?? ''} · ${t('corporateFooter')}`
+          : t('localDataNotice')}
       </footer>
 
       <TransactionForm
@@ -392,9 +388,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </SettingsProvider>
   );
 }
 

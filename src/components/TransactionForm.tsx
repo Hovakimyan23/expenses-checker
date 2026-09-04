@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, Trash2, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from '@/constants';
 import { todayISO, generateId } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import type { Transaction, TransactionType, CategoryId, PaymentMethod, AppMode, OrgRole, TxStatus } from '@/types';
 
 interface TransactionFormProps {
@@ -21,6 +22,7 @@ const STATUS_STYLES: Record<TxStatus, { bg: string; text: string; icon: typeof C
 };
 
 export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode = 'personal', role }: TransactionFormProps) {
+  const { t, currency } = useSettings();
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>('expense');
@@ -65,12 +67,13 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
   const availableCategories = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const isCorporate = mode === 'corporate';
   const canEdit = !isCorporate || !initial?.status || initial.status === 'pending' || role === 'admin';
+  const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency === 'RUB' ? '₽' : '֏';
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = parseFloat(amount);
-    if (!title.trim()) return setError('Please enter a title.');
-    if (!parsed || parsed <= 0) return setError('Amount must be greater than zero.');
+    if (!title.trim()) return setError(t('enterTitle'));
+    if (!parsed || parsed <= 0) return setError(t('amountGreaterThanZero'));
     onSave({
       id: initial?.id ?? generateId(),
       title: title.trim(),
@@ -91,8 +94,8 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="w-full max-w-lg animate-slide-up rounded-t-3xl bg-white p-6 shadow-2xl dark:bg-gray-900 sm:rounded-2xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{initial ? 'Edit Transaction' : 'Add Transaction'}</h2>
-          <button onClick={onClose} className="btn-ghost h-8 w-8 rounded-lg p-0" aria-label="Close">
+          <h2 className="text-lg font-bold">{initial ? t('editTransaction') : t('addTransaction')}</h2>
+          <button onClick={onClose} className="btn-ghost h-8 w-8 rounded-lg p-0" aria-label={t('cancel')}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -105,32 +108,32 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
-            {(['expense', 'income'] as TransactionType[]).map((t) => (
+            {(['expense', 'income'] as TransactionType[]).map((tType) => (
               <button
-                key={t}
+                key={tType}
                 type="button"
-                onClick={() => setType(t)}
+                onClick={() => setType(tType)}
                 disabled={!canEdit}
-                className={`rounded-lg py-2 text-sm font-semibold capitalize transition disabled:opacity-50 ${
-                  type === t
-                    ? t === 'income'
+                className={`rounded-lg py-2 text-sm font-semibold transition disabled:opacity-50 ${
+                  type === tType
+                    ? tType === 'income'
                       ? 'bg-emerald-500 text-white shadow-sm'
                       : 'bg-rose-500 text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400'
                 }`}
               >
-                {t}
+                {t(tType)}
               </button>
             ))}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Title</label>
+            <label className="mb-1.5 block text-sm font-medium">{t('title')}</label>
             <input
               className="input"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Grocery shopping"
+              placeholder="..."
               autoFocus
               disabled={!canEdit}
             />
@@ -138,9 +141,11 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Amount</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('amount')}</label>
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                  {symbol}
+                </span>
                 <input
                   className="input pl-7"
                   type="number"
@@ -154,7 +159,7 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Date</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('date')}</label>
               <input
                 className="input"
                 type="date"
@@ -166,7 +171,7 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Category</label>
+            <label className="mb-1.5 block text-sm font-medium">{t('category')}</label>
             <div className="grid grid-cols-3 gap-2">
               {availableCategories.map((c) => {
                 const Icon = c.icon;
@@ -184,7 +189,7 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{c.label}</span>
+                    <span className="truncate">{t(c.labelKey)}</span>
                   </button>
                 );
               })}
@@ -192,7 +197,7 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Payment Method</label>
+            <label className="mb-1.5 block text-sm font-medium">{t('paymentMethod')}</label>
             <select
               className="input"
               value={paymentMethod}
@@ -200,18 +205,18 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
               disabled={!canEdit}
             >
               {PAYMENT_METHODS.map((m) => (
-                <option key={m.id} value={m.id}>{m.label}</option>
+                <option key={m.id} value={m.id}>{t(m.labelKey)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Note (optional)</label>
+            <label className="mb-1.5 block text-sm font-medium">{t('noteOptional')}</label>
             <input
               className="input"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Add a note"
+              placeholder="..."
               disabled={!canEdit}
             />
           </div>
@@ -226,14 +231,14 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
                 className="btn border border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
               >
                 <Trash2 className="h-4 w-4" />
-                Delete
+                {t('delete')}
               </button>
             )}
             <div className="ml-auto flex gap-2">
-              <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={onClose} className="btn-secondary">{t('cancel')}</button>
               {canEdit && (
                 <button type="submit" className="btn-primary">
-                  {initial ? 'Save Changes' : 'Add Transaction'}
+                  {initial ? t('saveChanges') : t('addTransaction')}
                 </button>
               )}
             </div>
@@ -245,12 +250,13 @@ export function TransactionForm({ open, initial, onClose, onSave, onDelete, mode
 }
 
 export function StatusBadge({ status }: { status: TxStatus }) {
+  const { t } = useSettings();
   const style = STATUS_STYLES[status];
   const Icon = style.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold capitalize ${style.bg} ${style.text}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${style.bg} ${style.text}`}>
       <Icon className="h-3.5 w-3.5" />
-      {status}
+      {t(status)}
     </span>
   );
 }

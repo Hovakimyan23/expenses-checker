@@ -1,5 +1,7 @@
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
+import type { TranslationKey } from '@/lib/i18n';
 
 interface SummaryCardsProps {
   totalBalance: number;
@@ -8,32 +10,34 @@ interface SummaryCardsProps {
 }
 
 export function SummaryCards({ totalBalance, totalIncome, totalExpense }: SummaryCardsProps) {
+  const { t, currency } = useSettings();
+
   const cards = [
     {
-      label: 'Total Balance',
+      labelKey: 'totalBalance' as TranslationKey,
       value: totalBalance,
       icon: Wallet,
       accent: 'text-brand-600 dark:text-brand-400',
       bg: 'bg-brand-100 dark:bg-brand-500/15',
-      sub: totalBalance >= 0 ? 'In the green' : 'Negative balance',
+      subKey: (totalBalance >= 0 ? 'inTheGreen' : 'negativeBalance') as TranslationKey,
       subIcon: totalBalance >= 0 ? ArrowUpRight : ArrowDownRight,
     },
     {
-      label: 'Total Income',
+      labelKey: 'totalIncome' as TranslationKey,
       value: totalIncome,
       icon: TrendingUp,
       accent: 'text-emerald-600 dark:text-emerald-400',
       bg: 'bg-emerald-100 dark:bg-emerald-500/15',
-      sub: 'Money in',
+      subKey: 'moneyIn' as TranslationKey,
       subIcon: ArrowUpRight,
     },
     {
-      label: 'Total Expenses',
+      labelKey: 'totalExpenses' as TranslationKey,
       value: totalExpense,
       icon: TrendingDown,
       accent: 'text-rose-600 dark:text-rose-400',
       bg: 'bg-rose-100 dark:bg-rose-500/15',
-      sub: 'Money out',
+      subKey: 'moneyOut' as TranslationKey,
       subIcon: ArrowDownRight,
     },
   ];
@@ -44,12 +48,12 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense }: Summar
         const Icon = c.icon;
         const SubIcon = c.subIcon;
         return (
-          <div key={c.label} className="card p-5">
+          <div key={c.labelKey} className="card p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{c.label}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t(c.labelKey)}</p>
                 <p className="mt-2 text-2xl font-bold tracking-tight sm:text-[28px]">
-                  {formatCurrency(c.value)}
+                  {formatCurrency(c.value, currency)}
                 </p>
               </div>
               <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${c.bg}`}>
@@ -58,7 +62,7 @@ export function SummaryCards({ totalBalance, totalIncome, totalExpense }: Summar
             </div>
             <div className={`mt-3 inline-flex items-center gap-1 text-xs font-medium ${c.accent}`}>
               <SubIcon className="h-3.5 w-3.5" />
-              {c.sub}
+              {t(c.subKey)}
             </div>
           </div>
         );

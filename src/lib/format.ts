@@ -1,17 +1,20 @@
-import type { Transaction } from '@/types';
+import type { Transaction, CurrencyCode, LanguageCode } from '@/types';
+import { CURRENCY_MAP } from '@/lib/currencies';
 
-export function formatCurrency(amount: number, opts?: { compact?: boolean }): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency: CurrencyCode = 'USD', opts?: { compact?: boolean }): string {
+  const cfg = CURRENCY_MAP[currency] ?? CURRENCY_MAP.USD;
+  return new Intl.NumberFormat(cfg.locale, {
     style: 'currency',
-    currency: 'USD',
+    currency: cfg.code,
     notation: opts?.compact ? 'compact' : 'standard',
     maximumFractionDigits: opts?.compact ? 1 : 2,
   }).format(amount);
 }
 
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, language: LanguageCode = 'en'): string {
+  const locale = language === 'ru' ? 'ru-RU' : language === 'hy' ? 'hy-AM' : 'en-US';
   const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -22,12 +25,18 @@ export function monthKey(iso: string): string {
   return iso.slice(0, 7); // yyyy-mm
 }
 
-export function monthLabel(key: string): string {
+export function monthLabel(key: string, language: LanguageCode = 'en'): string {
+  const locale = language === 'ru' ? 'ru-RU' : language === 'hy' ? 'hy-AM' : 'en-US';
   const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', {
+  return new Date(y, m - 1, 1).toLocaleDateString(locale, {
     month: 'short',
     year: '2-digit',
   });
+}
+
+export function formatMonthYear(language: LanguageCode = 'en'): string {
+  const locale = language === 'ru' ? 'ru-RU' : language === 'hy' ? 'hy-AM' : 'en-US';
+  return new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
 export function todayISO(): string {

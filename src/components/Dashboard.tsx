@@ -4,6 +4,7 @@ import { SpendingPieChart } from '@/components/SpendingPieChart';
 import { MonthlyBarChart } from '@/components/MonthlyBarChart';
 import { CATEGORIES } from '@/constants';
 import { monthKey } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import type { Transaction, CategoryId } from '@/types';
 
 interface DashboardProps {
@@ -11,6 +12,8 @@ interface DashboardProps {
 }
 
 export function Dashboard({ transactions }: DashboardProps) {
+  const { t } = useSettings();
+
   const totalIncome = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const totalBalance = totalIncome - totalExpense;
@@ -44,7 +47,7 @@ export function Dashboard({ transactions }: DashboardProps) {
         <div className="card p-5">
           <div className="mb-4 flex items-center gap-2">
             <PieIcon className="h-4 w-4 text-gray-400" />
-            <h2 className="text-sm font-semibold">Spending by Category</h2>
+            <h2 className="text-sm font-semibold">{t('spendingByCategory')}</h2>
           </div>
           <SpendingPieChart data={spendingByCategory} />
         </div>
@@ -52,7 +55,7 @@ export function Dashboard({ transactions }: DashboardProps) {
         <div className="card p-5">
           <div className="mb-4 flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-gray-400" />
-            <h2 className="text-sm font-semibold">Monthly Comparison</h2>
+            <h2 className="text-sm font-semibold">{t('monthlyComparison')}</h2>
           </div>
           <MonthlyBarChart data={monthlyData} />
         </div>

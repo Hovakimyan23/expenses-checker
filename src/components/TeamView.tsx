@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Users, UserPlus, Trash2, Shield, UserCog, Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useSettings } from '@/context/SettingsContext';
 import type { OrgMember, OrgRole } from '@/types';
+import type { TranslationKey } from '@/lib/i18n';
 
 interface TeamViewProps {
   orgId: string;
@@ -16,6 +18,7 @@ const ROLE_STYLES: Record<OrgRole, { bg: string; text: string; icon: typeof Shie
 };
 
 export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps) {
+  const { t, language } = useSettings();
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -29,23 +32,14 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
 
   async function loadMembers() {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error: err } = await supabase
       .from('org_members')
       .select('id, org_id, user_id, role, created_at')
       .eq('org_id', orgId)
       .order('created_at');
 
-    if (!error && data) {
-      // Fetch emails from auth.users via the user_id — not directly accessible,
-      // so we use the profiles approach: we'll just show user_id truncated as fallback
-      const membersWithEmail = await Promise.all(
-        data.map(async (m) => {
-          // Try to get email from auth admin API is not available from client.
-          // We'll show a truncated user ID as identifier.
-          return { ...m } as OrgMember;
-        })
-      );
-      setMembers(membersWithEmail);
+    if (!err && data) {
+      setMembers(data as OrgMember[]);
     }
     setLoading(false);
   }
@@ -54,41 +48,38 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
     e.preventDefault();
     setError('');
     setActionLoading(true);
-
-    // In a real app, you'd send an invite email. Here we look up if the user exists by email.
-    // Since we can't query auth.users from the client, we'll show a helpful message.
-    setError('Invite by email requires a server function. For now, ask the team member to sign up and then add them by their user ID.');
+    setError(t('inviteEmailRequiresServer'));
     setActionLoading(false);
   }
 
   async function changeRole(memberId: string, newRole: OrgRole) {
     setActionLoading(true);
-    const { error } = await supabase
+    const { error: err } = await supabase
       .from('org_members')
       .update({ role: newRole })
       .eq('id', memberId);
 
-    if (!error) {
+    if (!err) {
       await loadMembers();
       onMemberChange?.();
     } else {
-      setError(error.message);
+      setError(err.message);
     }
     setActionLoading(false);
   }
 
   async function removeMember(memberId: string) {
     setActionLoading(true);
-    const { error } = await supabase
+    const { error: err } = await supabase
       .from('org_members')
       .delete()
       .eq('id', memberId);
 
-    if (!error) {
+    if (!err) {
       await loadMembers();
       onMemberChange?.();
     } else {
-      setError(error.message);
+      setError(err.message);
     }
     setActionLoading(false);
   }
@@ -101,24 +92,25 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
     );
   }
 
+  const locale = language === 'ru' ? 'ru-RU' : language === 'hy' ? 'hy-AM' : 'en-US';
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-lg font-bold">Team Members</h2>
+        <h2 className="text-lg font-bold">{t('teamMembers')}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Manage roles and permissions for your organization.
+          {t('manageRoles')}
         </p>
       </div>
 
-      {/* Invite form */}
       <div className="card p-5">
         <div className="mb-3 flex items-center gap-2">
           <UserPlus className="h-4 w-4 text-gray-400" />
-          <h3 className="text-sm font-semibold">Invite Member</h3>
+          <h3 className="text-sm font-semibold">{t('inviteMember')}</h3>
         </div>
         <form onSubmit={handleInvite} className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Email</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('email')}</label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
@@ -126,31 +118,30 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="colleague@company.com"
+                placeholder="..."
               />
             </div>
           </div>
           <div className="sm:w-40">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Role</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('team')}</label>
             <select
               className="input"
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as OrgRole)}
             >
-              <option value="employee">Employee</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
+              <option value="employee">{t('employee')}</option>
+              <option value="manager">{t('manager')}</option>
+              <option value="admin">{t('admin')}</option>
             </select>
           </div>
           <button type="submit" className="btn-primary" disabled={actionLoading}>
             {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Invite
+            {t('invite')}
           </button>
         </form>
         {error && <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{error}</p>}
       </div>
 
-      {/* Members list */}
       <div className="card divide-y divide-gray-100 dark:divide-gray-800">
         {members.map((m) => {
           const style = ROLE_STYLES[m.role];
@@ -164,16 +155,16 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
               <div className="min-w-0 flex-1">
                 <p className="font-medium">
                   {m.user_id.slice(0, 8)}...
-                  {isSelf && <span className="ml-2 text-xs text-gray-400">(you)</span>}
+                  {isSelf && <span className="ml-2 text-xs text-gray-400">{t('you')}</span>}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Joined {new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {t('joined')} {new Date(m.created_at).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`badge ${style.bg} ${style.text}`}>
                   <RoleIcon className="h-3 w-3" />
-                  <span className="capitalize">{m.role}</span>
+                  <span>{t(m.role as TranslationKey)}</span>
                 </span>
                 {!isSelf && (
                   <>
@@ -182,14 +173,14 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
                       onChange={(e) => changeRole(m.id, e.target.value as OrgRole)}
                       className="hidden rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 sm:block"
                     >
-                      <option value="employee">Employee</option>
-                      <option value="manager">Manager</option>
-                      <option value="admin">Admin</option>
+                      <option value="employee">{t('employee')}</option>
+                      <option value="manager">{t('manager')}</option>
+                      <option value="admin">{t('admin')}</option>
                     </select>
                     <button
                       onClick={() => removeMember(m.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 transition hover:bg-rose-50 dark:hover:bg-rose-500/10"
-                      title="Remove member"
+                      title={t('removeMember')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

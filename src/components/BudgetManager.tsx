@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Plus, X, AlertTriangle, Check, Pencil } from 'lucide-react';
 import { EXPENSE_CATEGORIES, CATEGORY_MAP } from '@/constants';
-import { formatCurrency, monthKey } from '@/lib/format';
+import { formatCurrency, monthKey, formatMonthYear } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import type { Budget, Transaction, CategoryId } from '@/types';
 
 interface BudgetManagerProps {
@@ -13,6 +14,7 @@ interface BudgetManagerProps {
 }
 
 export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete }: BudgetManagerProps) {
+  const { t, currency, language } = useSettings();
   const [editing, setEditing] = useState<CategoryId | null>(null);
   const [value, setValue] = useState('');
   const [adding, setAdding] = useState<CategoryId | null>(null);
@@ -21,14 +23,16 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
   const currentMonth = monthKey(new Date().toISOString().slice(0, 10));
 
   const spentByCategory: Record<string, number> = {};
-  for (const t of transactions) {
-    if (t.type !== 'expense') continue;
-    if (monthKey(t.date) !== currentMonth) continue;
-    spentByCategory[t.category] = (spentByCategory[t.category] ?? 0) + t.amount;
+  for (const tx of transactions) {
+    if (tx.type !== 'expense') continue;
+    if (monthKey(tx.date) !== currentMonth) continue;
+    spentByCategory[tx.category] = (spentByCategory[tx.category] ?? 0) + tx.amount;
   }
 
   const budgetedIds = new Set(budgets.map((b) => b.category));
   const unbudgeted = EXPENSE_CATEGORIES.filter((c) => !budgetedIds.has(c.id));
+
+  const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency === 'RUB' ? '₽' : '֏';
 
   function startEdit(cat: CategoryId, current: number) {
     setEditing(cat);
@@ -58,16 +62,16 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold">Monthly Budgets</h2>
+          <h2 className="text-lg font-bold">{t('monthlyBudgets')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Track spending limits for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+            {t('trackSpendingLimits', { month: formatMonthYear(language) })}
           </p>
         </div>
       </div>
 
       {budgets.length === 0 && unbudgeted.length === 0 ? (
         <div className="card p-12 text-center text-sm text-gray-500 dark:text-gray-400">
-          All expense categories have budgets set.
+          {t('allCategoriesBudgeted')}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -94,9 +98,9 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
                       <Icon className={`h-5 w-5 ${cat.textClass}`} />
                     </div>
                     <div>
-                      <p className="font-semibold">{cat.label}</p>
+                      <p className="font-semibold">{t(cat.labelKey)}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Limit {formatCurrency(b.limit)}
+                        {t('limit')} {formatCurrency(b.limit, currency)}
                       </p>
                     </div>
                   </div>
@@ -113,7 +117,7 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
                 {editing === b.category ? (
                   <div className="mt-4 flex items-center gap-2">
                     <div className="relative flex-1">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
                       <input
                         className="input pl-7"
                         type="number"
@@ -126,17 +130,17 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
                       />
                     </div>
                     <button onClick={saveEdit} className="btn-primary">
-                      Save
+                      {t('save')}
                     </button>
                     <button onClick={() => setEditing(null)} className="btn-secondary">
-                      Cancel
+                      {t('cancel')}
                     </button>
                   </div>
                 ) : (
                   <>
                     <div className="mt-4">
                       <div className="mb-1.5 flex items-center justify-between text-sm">
-                        <span className="font-medium">{formatCurrency(spent)} spent</span>
+                        <span className="font-medium">{formatCurrency(spent, currency)} {t('expense').toLowerCase()}</span>
                         <span
                           className={`text-xs font-semibold ${
                             over
@@ -160,17 +164,17 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
                       {over ? (
                         <span className="inline-flex items-center gap-1 font-medium text-rose-600 dark:text-rose-400">
                           <AlertTriangle className="h-3.5 w-3.5" />
-                          Over budget by {formatCurrency(spent - b.limit)}
+                          {t('overBudgetBy', { amount: formatCurrency(spent - b.limit, currency) })}
                         </span>
                       ) : warning ? (
                         <span className="inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
                           <AlertTriangle className="h-3.5 w-3.5" />
-                          Approaching limit — {formatCurrency(b.limit - spent)} left
+                          {t('approachingLimit', { amount: formatCurrency(b.limit - spent, currency) })}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
                           <Check className="h-3.5 w-3.5" />
-                          {formatCurrency(b.limit - spent)} remaining
+                          {t('remaining', { amount: formatCurrency(b.limit - spent, currency) })}
                         </span>
                       )}
                     </div>
@@ -183,7 +187,7 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
           {/* Add new budget */}
           {adding ? (
             <div className="card border-dashed p-5">
-              <label className="mb-1.5 block text-sm font-medium">Category</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('category')}</label>
               <select
                 className="input mb-3"
                 value={adding}
@@ -191,13 +195,13 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
               >
                 {unbudgeted.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.label}
+                    {t(c.labelKey)}
                   </option>
                 ))}
               </select>
-              <label className="mb-1.5 block text-sm font-medium">Monthly Limit</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('limit')}</label>
               <div className="relative mb-3">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
                 <input
                   className="input pl-7"
                   type="number"
@@ -211,10 +215,10 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
               </div>
               <div className="flex gap-2">
                 <button onClick={saveAdd} className="btn-primary">
-                  Add Budget
+                  {t('addBudget')}
                 </button>
                 <button onClick={() => setAdding(null)} className="btn-secondary">
-                  Cancel
+                  {t('cancel')}
                 </button>
               </div>
             </div>
@@ -228,7 +232,7 @@ export function BudgetManager({ budgets, transactions, onAdd, onUpdate, onDelete
                 className="card flex min-h-[140px] items-center justify-center gap-2 border-dashed text-sm font-medium text-gray-500 transition hover:border-brand-400 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400"
               >
                 <Plus className="h-5 w-5" />
-                Add Budget
+                {t('addBudget')}
               </button>
             )
           )}

@@ -1,6 +1,7 @@
 import { ClipboardCheck, Check, X, Inbox } from 'lucide-react';
-import { CATEGORY_MAP, PAYMENT_METHOD_MAP } from '@/constants';
+import { CATEGORY_MAP, PAYMENT_METHOD_KEYS } from '@/constants';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import { StatusBadge } from '@/components/TransactionForm';
 import type { Transaction } from '@/types';
 
@@ -11,18 +12,19 @@ interface ApprovalsViewProps {
 }
 
 export function ApprovalsView({ transactions, onApprove, onReject }: ApprovalsViewProps) {
-  const pending = transactions.filter((t) => t.status === 'pending');
+  const { t, currency, language } = useSettings();
+  const pending = transactions.filter((tx) => tx.status === 'pending');
   const reviewed = transactions
-    .filter((t) => t.status === 'approved' || t.status === 'rejected')
+    .filter((tx) => tx.status === 'approved' || tx.status === 'rejected')
     .sort((a, b) => (b.reviewed_at ?? '').localeCompare(a.reviewed_at ?? ''))
     .slice(0, 10);
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-lg font-bold">Approvals</h2>
+        <h2 className="text-lg font-bold">{t('approvals')}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Review and approve pending expense submissions from your team.
+          {t('reviewApprovals')}
         </p>
       </div>
 
@@ -32,9 +34,9 @@ export function ApprovalsView({ transactions, onApprove, onReject }: ApprovalsVi
             <Inbox className="h-6 w-6 text-gray-400" />
           </div>
           <div>
-            <p className="font-semibold">No pending approvals</p>
+            <p className="font-semibold">{t('noPendingApprovals')}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              All caught up — new submissions will appear here.
+              {t('allCaughtUp')}
             </p>
           </div>
         </div>
@@ -42,45 +44,45 @@ export function ApprovalsView({ transactions, onApprove, onReject }: ApprovalsVi
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
             <ClipboardCheck className="h-4 w-4" />
-            {pending.length} pending {pending.length === 1 ? 'request' : 'requests'}
+            {pending.length} {pending.length === 1 ? t('pendingRequest') : t('pendingRequests')}
           </div>
           <div className="card divide-y divide-gray-100 dark:divide-gray-800">
-            {pending.map((t) => {
-              const cat = CATEGORY_MAP[t.category];
+            {pending.map((tx) => {
+              const cat = CATEGORY_MAP[tx.category];
               const Icon = cat.icon;
               return (
-                <div key={t.id} className="flex items-center gap-3 p-4">
+                <div key={tx.id} className="flex items-center gap-3 p-4">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${cat.bgClass}`}>
                     <Icon className={`h-5 w-5 ${cat.textClass}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{t.title}</p>
+                    <p className="truncate font-medium">{tx.title}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      <span className={`badge ${cat.bgClass} ${cat.textClass} px-2 py-0.5`}>{cat.label}</span>
-                      <span>{formatDate(t.date)}</span>
+                      <span className={`badge ${cat.bgClass} ${cat.textClass} px-2 py-0.5`}>{t(cat.labelKey)}</span>
+                      <span>{formatDate(tx.date, language)}</span>
                       <span className="hidden sm:inline">·</span>
-                      <span className="hidden sm:inline">{PAYMENT_METHOD_MAP[t.paymentMethod]}</span>
-                      {t.authorName && (
+                      <span className="hidden sm:inline">{t(PAYMENT_METHOD_KEYS[tx.paymentMethod])}</span>
+                      {tx.authorName && (
                         <>
                           <span className="hidden sm:inline">·</span>
-                          <span className="hidden sm:inline">by {t.authorName}</span>
+                          <span className="hidden sm:inline">{t('by')} {tx.authorName}</span>
                         </>
                       )}
                     </div>
                   </div>
-                  <span className="text-sm font-semibold">{formatCurrency(t.amount)}</span>
+                  <span className="text-sm font-semibold">{formatCurrency(tx.amount, currency)}</span>
                   <div className="flex gap-1">
                     <button
-                      onClick={() => onApprove(t.id)}
+                      onClick={() => onApprove(tx.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 transition hover:bg-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400"
-                      title="Approve"
+                      title={t('approved')}
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => onReject(t.id)}
+                      onClick={() => onReject(tx.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600 transition hover:bg-rose-200 dark:bg-rose-500/15 dark:text-rose-400"
-                      title="Reject"
+                      title={t('rejected')}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -94,25 +96,25 @@ export function ApprovalsView({ transactions, onApprove, onReject }: ApprovalsVi
 
       {reviewed.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Recently Reviewed</h3>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t('recentlyReviewed')}</h3>
           <div className="card divide-y divide-gray-100 dark:divide-gray-800">
-            {reviewed.map((t) => {
-              const cat = CATEGORY_MAP[t.category];
+            {reviewed.map((tx) => {
+              const cat = CATEGORY_MAP[tx.category];
               const Icon = cat.icon;
               return (
-                <div key={t.id} className="flex items-center gap-3 p-4">
+                <div key={tx.id} className="flex items-center gap-3 p-4">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${cat.bgClass}`}>
                     <Icon className={`h-5 w-5 ${cat.textClass}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{t.title}</p>
+                    <p className="truncate font-medium">{tx.title}</p>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{formatDate(t.date)}</span>
+                      <span>{formatDate(tx.date, language)}</span>
                       <span>·</span>
-                      <span>{formatCurrency(t.amount)}</span>
+                      <span>{formatCurrency(tx.amount, currency)}</span>
                     </div>
                   </div>
-                  <StatusBadge status={t.status!} />
+                  <StatusBadge status={tx.status!} />
                 </div>
               );
             })}

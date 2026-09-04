@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { formatCurrency, monthLabel } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import { tooltipStyle } from '@/components/SpendingPieChart';
 
 interface MonthlyBarProps {
@@ -15,8 +16,9 @@ interface MonthlyBarProps {
 }
 
 export function MonthlyBarChart({ data }: MonthlyBarProps) {
+  const { t, currency, language } = useSettings();
   const chartData = data.map((d) => ({
-    label: monthLabel(d.month),
+    label: monthLabel(d.month, language),
     Income: d.income,
     Expense: d.expense,
   }));
@@ -24,7 +26,7 @@ export function MonthlyBarChart({ data }: MonthlyBarProps) {
   if (chartData.length === 0) {
     return (
       <div className="flex h-72 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
-        No monthly data yet.
+        {t('noMonthlyData')}
       </div>
     );
   }
@@ -39,10 +41,10 @@ export function MonthlyBarChart({ data }: MonthlyBarProps) {
             tickLine={false}
             axisLine={false}
             tick={{ fontSize: 12 }}
-            tickFormatter={(v: number) => formatCurrency(v, { compact: true })}
+            tickFormatter={(v: number) => formatCurrency(v, currency, { compact: true })}
           />
           <Tooltip
-            formatter={(value, name) => [formatCurrency(Number(value)), name as string]}
+            formatter={(value, name) => [formatCurrency(Number(value), currency), name as string]}
             contentStyle={tooltipStyle}
             cursor={{ fill: 'rgba(0,0,0,0.04)' }}
           />

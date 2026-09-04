@@ -8,10 +8,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { CategoryId, PaymentMethod, TransactionType } from '@/types';
+import type { TranslationKey } from '@/lib/i18n';
 
 export interface CategoryConfig {
   id: CategoryId;
-  label: string;
+  labelKey: TranslationKey;
   icon: LucideIcon;
   color: string; // hex for charts
   textClass: string;
@@ -23,7 +24,7 @@ export interface CategoryConfig {
 export const CATEGORIES: CategoryConfig[] = [
   {
     id: 'food',
-    label: 'Food',
+    labelKey: 'food',
     icon: UtensilsCrossed,
     color: '#f97316',
     textClass: 'text-orange-600 dark:text-orange-400',
@@ -33,7 +34,7 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: 'utilities',
-    label: 'Utilities',
+    labelKey: 'utilities',
     icon: Lightbulb,
     color: '#eab308',
     textClass: 'text-yellow-600 dark:text-yellow-400',
@@ -43,7 +44,7 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: 'entertainment',
-    label: 'Entertainment',
+    labelKey: 'entertainment',
     icon: Clapperboard,
     color: '#ec4899',
     textClass: 'text-pink-600 dark:text-pink-400',
@@ -53,7 +54,7 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: 'transport',
-    label: 'Transport',
+    labelKey: 'transport',
     icon: Bus,
     color: '#0ea5e9',
     textClass: 'text-sky-600 dark:text-sky-400',
@@ -63,7 +64,7 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: 'salary',
-    label: 'Salary',
+    labelKey: 'salary',
     icon: Wallet,
     color: '#10b981',
     textClass: 'text-brand-600 dark:text-brand-400',
@@ -73,7 +74,7 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: 'investments',
-    label: 'Investments',
+    labelKey: 'investments',
     icon: TrendingUp,
     color: '#8b5cf6',
     textClass: 'text-violet-600 dark:text-violet-400',
@@ -91,15 +92,15 @@ export const CATEGORY_MAP: Record<CategoryId, CategoryConfig> = CATEGORIES.reduc
 export const EXPENSE_CATEGORIES = CATEGORIES.filter((c) => c.type === 'expense');
 export const INCOME_CATEGORIES = CATEGORIES.filter((c) => c.type === 'income');
 
-export const PAYMENT_METHODS: { id: PaymentMethod; label: string }[] = [
-  { id: 'cash', label: 'Cash' },
-  { id: 'card', label: 'Credit/Debit Card' },
-  { id: 'bank', label: 'Bank Transfer' },
-  { id: 'wallet', label: 'Digital Wallet' },
+export const PAYMENT_METHODS: { id: PaymentMethod; labelKey: TranslationKey }[] = [
+  { id: 'cash', labelKey: 'cash' },
+  { id: 'card', labelKey: 'creditDebitCard' },
+  { id: 'bank', labelKey: 'bankTransfer' },
+  { id: 'wallet', labelKey: 'digitalWallet' },
 ];
 
-export const PAYMENT_METHOD_MAP: Record<PaymentMethod, string> =
+export const PAYMENT_METHOD_KEYS: Record<PaymentMethod, TranslationKey> =
   PAYMENT_METHODS.reduce(
-    (acc, m) => ({ ...acc, [m.id]: m.label }),
-    {} as Record<PaymentMethod, string>,
+    (acc, m) => ({ ...acc, [m.id]: m.labelKey }),
+    {} as Record<PaymentMethod, TranslationKey>,
   );

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Wallet, Mail, Lock, Building2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 export function AuthForm() {
   const { signIn, signUp } = useAuth();
+  const { t } = useSettings();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ export function AuthForm() {
 
     if (mode === 'signup') {
       if (!orgName.trim()) {
-        setError('Please enter your organization name.');
+        setError(t('enterOrgName'));
         setLoading(false);
         return;
       }
@@ -38,9 +40,9 @@ export function AuthForm() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-600/30">
             <Wallet className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Finch Corporate</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('finchCorporate')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {mode === 'signin' ? 'Sign in to your workspace' : 'Create your organization'}
+            {mode === 'signin' ? t('signInToWorkspace') : t('createOrganization')}
           </p>
         </div>
 
@@ -55,7 +57,7 @@ export function AuthForm() {
                   : 'text-gray-500 dark:text-gray-400'
               }`}
             >
-              Sign In
+              {t('signIn')}
             </button>
             <button
               type="button"
@@ -66,21 +68,21 @@ export function AuthForm() {
                   : 'text-gray-500 dark:text-gray-400'
               }`}
             >
-              Sign Up
+              {t('signUp')}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Organization Name</label>
+                <label className="mb-1.5 block text-sm font-medium">{t('orgName')}</label>
                 <div className="relative">
                   <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input
                     className="input pl-10"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Acme Inc."
+                    placeholder="..."
                     autoFocus
                   />
                 </div>
@@ -88,7 +90,7 @@ export function AuthForm() {
             )}
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Email</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('email')}</label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
@@ -96,14 +98,14 @@ export function AuthForm() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
+                  placeholder="..."
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium">Password</label>
+              <label className="mb-1.5 block text-sm font-medium">{t('password')}</label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
@@ -124,13 +126,13 @@ export function AuthForm() {
 
             <button type="submit" className="btn-primary w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {mode === 'signin' ? 'Sign In' : 'Create Account'}
+              {mode === 'signin' ? t('signInBtn') : t('createAccountBtn')}
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
-          Corporate mode uses a shared database with roles and approvals.
+          {t('corporateDescShort')}
         </p>
       </div>
     </div>

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Search, Plus, Download, Sparkles, Pencil, ArrowUpRight, ArrowDownRight, Filter, Check, X } from 'lucide-react';
-import { CATEGORIES, CATEGORY_MAP, PAYMENT_METHOD_MAP } from '@/constants';
+import { CATEGORIES, CATEGORY_MAP, PAYMENT_METHOD_KEYS } from '@/constants';
 import { formatCurrency, formatDate, downloadCSV } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import { StatusBadge } from '@/components/TransactionForm';
 import type { Transaction, CategoryId, TransactionType, AppMode, OrgRole, TxStatus } from '@/types';
 
@@ -23,6 +24,7 @@ type FilterStatus = 'all' | TxStatus;
 export function TransactionList({
   transactions, onAdd, onEdit, onLoadSample, mode = 'personal', role, onApprove, onReject,
 }: TransactionListProps) {
+  const { t, currency, language } = useSettings();
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterCategory, setFilterCategory] = useState<FilterCategory>('all');
@@ -66,7 +68,7 @@ export function TransactionList({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             className="input pl-9"
-            placeholder="Search by title..."
+            placeholder={t('searchByTitle')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -77,22 +79,22 @@ export function TransactionList({
             className={`btn-secondary ${hasFilters ? 'border-brand-400 text-brand-700 dark:text-brand-400' : ''}`}
           >
             <Filter className="h-4 w-4" />
-            Filters
+            {t('filters')}
             {hasFilters && <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />}
           </button>
           {!isCorporate && (
             <button onClick={onLoadSample} className="btn-secondary">
               <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Sample Data</span>
+              <span className="hidden sm:inline">{t('sampleData')}</span>
             </button>
           )}
           <button onClick={() => downloadCSV(filtered)} className="btn-secondary" disabled={filtered.length === 0}>
             <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">{t('export')}</span>
           </button>
           <button onClick={onAdd} className="btn-primary">
             <Plus className="h-4 w-4" />
-            Add
+            {t('add')}
           </button>
         </div>
       </div>
@@ -101,45 +103,45 @@ export function TransactionList({
         <div className="card animate-scale-in p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Type</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allTypes').replace('All ', '')}</label>
               <select className="input" value={filterType} onChange={(e) => setFilterType(e.target.value as FilterType)}>
-                <option value="all">All types</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
+                <option value="all">{t('allTypes')}</option>
+                <option value="income">{t('income')}</option>
+                <option value="expense">{t('expense')}</option>
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('category')}</label>
               <select className="input" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value as FilterCategory)}>
-                <option value="all">All categories</option>
+                <option value="all">{t('allCategories')}</option>
                 {CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
+                  <option key={c.id} value={c.id}>{t(c.labelKey)}</option>
                 ))}
               </select>
             </div>
             {isCorporate && (
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Status</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allStatuses').replace('All ', '')}</label>
                 <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}>
-                  <option value="all">All statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  <option value="all">{t('allStatuses')}</option>
+                  <option value="pending">{t('pending')}</option>
+                  <option value="approved">{t('approved')}</option>
+                  <option value="rejected">{t('rejected')}</option>
                 </select>
               </div>
             )}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">From date</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('fromDate')}</label>
               <input className="input" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">To date</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('toDate')}</label>
               <input className="input" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
             </div>
           </div>
           {hasFilters && (
             <button onClick={clearFilters} className="mt-3 text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">
-              Clear all filters
+              {t('clearFilters')}
             </button>
           )}
         </div>
@@ -151,53 +153,53 @@ export function TransactionList({
             <Search className="h-6 w-6 text-gray-400" />
           </div>
           <div>
-            <p className="font-semibold">No transactions found</p>
+            <p className="font-semibold">{t('noTransactionsFound')}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {hasFilters ? 'Try adjusting your filters.' : 'Add your first transaction to get started.'}
+              {hasFilters ? t('tryAdjustingFilters') : t('addFirstTransaction')}
             </p>
           </div>
           {!hasFilters && (
             <button onClick={onAdd} className="btn-primary">
               <Plus className="h-4 w-4" />
-              Add Transaction
+              {t('addTransaction')}
             </button>
           )}
         </div>
       ) : (
         <div className="card divide-y divide-gray-100 dark:divide-gray-800">
-          {filtered.map((t) => {
-            const cat = CATEGORY_MAP[t.category];
+          {filtered.map((tx) => {
+            const cat = CATEGORY_MAP[tx.category];
             const Icon = cat.icon;
-            const isIncome = t.type === 'income';
-            const status = t.status;
+            const isIncome = tx.type === 'income';
+            const status = tx.status;
             const isPending = status === 'pending';
             const isRejected = status === 'rejected';
             return (
               <div
-                key={t.id}
+                key={tx.id}
                 className="group flex w-full items-center gap-3 p-4 transition hover:bg-gray-50 dark:hover:bg-gray-800/50"
               >
-                <button onClick={() => onEdit(t)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                <button onClick={() => onEdit(tx)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${cat.bgClass}`}>
                     <Icon className={`h-5 w-5 ${cat.textClass}`} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{t.title}</p>
+                    <p className="truncate font-medium">{tx.title}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      <span className={`badge ${cat.bgClass} ${cat.textClass} px-2 py-0.5`}>{cat.label}</span>
-                      <span>{formatDate(t.date)}</span>
+                      <span className={`badge ${cat.bgClass} ${cat.textClass} px-2 py-0.5`}>{t(cat.labelKey)}</span>
+                      <span>{formatDate(tx.date, language)}</span>
                       <span className="hidden sm:inline">·</span>
-                      <span className="hidden sm:inline">{PAYMENT_METHOD_MAP[t.paymentMethod]}</span>
+                      <span className="hidden sm:inline">{t(PAYMENT_METHOD_KEYS[tx.paymentMethod])}</span>
                       {isCorporate && status && (
                         <>
                           <span className="hidden sm:inline">·</span>
                           <StatusBadge status={status} />
                         </>
                       )}
-                      {t.note && (
+                      {tx.note && (
                         <>
                           <span className="hidden sm:inline">·</span>
-                          <span className="hidden truncate sm:inline">{t.note}</span>
+                          <span className="hidden truncate sm:inline">{tx.note}</span>
                         </>
                       )}
                     </div>
@@ -205,7 +207,7 @@ export function TransactionList({
                 </button>
                 <div className="flex items-center gap-2">
                   <span className={`text-sm font-semibold ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : isRejected ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-gray-100'}`}>
-                    {isIncome ? '+' : '-'}{formatCurrency(t.amount)}
+                    {isIncome ? '+' : '-'}{formatCurrency(tx.amount, currency)}
                   </span>
                   {isIncome ? (
                     <ArrowUpRight className="h-4 w-4 text-emerald-500" />
@@ -215,22 +217,22 @@ export function TransactionList({
                   {canApprove && isPending && onApprove && onReject && (
                     <div className="ml-1 flex gap-1">
                       <button
-                        onClick={() => onApprove(t.id)}
+                        onClick={() => onApprove(tx.id)}
                         className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 transition hover:bg-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400"
-                        title="Approve"
+                        title={t('approved')}
                       >
                         <Check className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => onReject(t.id)}
+                        onClick={() => onReject(tx.id)}
                         className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-600 transition hover:bg-rose-200 dark:bg-rose-500/15 dark:text-rose-400"
-                        title="Reject"
+                        title={t('rejected')}
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
                   )}
-                  <button onClick={() => onEdit(t)} className="p-0">
+                  <button onClick={() => onEdit(tx)} className="p-0">
                     <Pencil className="h-4 w-4 text-gray-300 opacity-0 transition group-hover:opacity-100 dark:text-gray-600" />
                   </button>
                 </div>
@@ -241,7 +243,7 @@ export function TransactionList({
       )}
 
       <p className="px-1 text-xs text-gray-400 dark:text-gray-500">
-        Showing {filtered.length} of {transactions.length} transactions
+        {t('showingTransactions', { shown: filtered.length, total: transactions.length })}
       </p>
     </div>
   );

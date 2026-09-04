@@ -16,6 +16,10 @@ export type OrgRole = 'admin' | 'manager' | 'employee';
 
 export type TxStatus = 'pending' | 'approved' | 'rejected';
 
+export type CurrencyCode = 'USD' | 'EUR' | 'RUB' | 'AMD' | 'GBP';
+
+export type LanguageCode = 'en' | 'ru' | 'hy';
+
 export interface Transaction {
   id: string;
   title: string;

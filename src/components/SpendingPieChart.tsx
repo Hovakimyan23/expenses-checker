@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { CATEGORY_MAP } from '@/constants';
 import { formatCurrency } from '@/lib/format';
+import { useSettings } from '@/context/SettingsContext';
 import type { CategoryId } from '@/types';
 
 interface SpendingPieProps {
@@ -8,10 +9,11 @@ interface SpendingPieProps {
 }
 
 export function SpendingPieChart({ data }: SpendingPieProps) {
+  const { t, currency } = useSettings();
   const chartData = data
     .filter((d) => d.value > 0)
     .map((d) => ({
-      name: CATEGORY_MAP[d.category].label,
+      name: t(CATEGORY_MAP[d.category].labelKey),
       value: d.value,
       color: CATEGORY_MAP[d.category].color,
     }));
@@ -19,7 +21,7 @@ export function SpendingPieChart({ data }: SpendingPieProps) {
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   if (chartData.length === 0) {
-    return <EmptyChart message="No expenses to chart yet." />;
+    return <EmptyChart message={t('noExpensesToChart')} />;
   }
 
   return (
@@ -42,7 +44,7 @@ export function SpendingPieChart({ data }: SpendingPieProps) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value) => formatCurrency(Number(value))}
+            formatter={(value) => formatCurrency(Number(value), currency)}
             contentStyle={tooltipStyle}
           />
           <Legend
@@ -56,8 +58,8 @@ export function SpendingPieChart({ data }: SpendingPieProps) {
       </ResponsiveContainer>
       <div className="-mt-[300px] flex h-72 items-center justify-center pointer-events-none">
         <div className="text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500">Total spent</p>
-          <p className="text-lg font-bold">{formatCurrency(total)}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{t('totalSpent')}</p>
+          <p className="text-lg font-bold">{formatCurrency(total, currency)}</p>
         </div>
       </div>
     </div>
