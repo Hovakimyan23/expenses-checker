@@ -6,7 +6,10 @@ export type CategoryId =
   | 'entertainment'
   | 'transport'
   | 'salary'
-  | 'investments';
+  | 'investments'
+  | 'shopping'
+  | 'healthcare'
+  | 'other';
 
 export type PaymentMethod = 'cash' | 'card' | 'bank' | 'wallet';
 
@@ -26,17 +29,16 @@ export interface Transaction {
   amount: number;
   category: CategoryId;
   type: TransactionType;
-  date: string; // ISO yyyy-mm-dd
+  date: string;
   paymentMethod: PaymentMethod;
   note?: string;
-  // Corporate-only fields
   status?: TxStatus;
   user_id?: string;
   org_id?: string;
   reviewer_id?: string | null;
   reviewed_at?: string | null;
   created_at?: string;
-  authorName?: string; // joined from profile
+  authorName?: string;
 }
 
 export interface Budget {

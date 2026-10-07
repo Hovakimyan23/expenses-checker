@@ -5,6 +5,9 @@ import {
   Bus,
   Wallet,
   TrendingUp,
+  ShoppingBag,
+  HeartPulse,
+  MoreHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import type { CategoryId, PaymentMethod, TransactionType } from '@/types';
@@ -14,7 +17,7 @@ export interface CategoryConfig {
   id: CategoryId;
   labelKey: TranslationKey;
   icon: LucideIcon;
-  color: string; // hex for charts
+  color: string;
   textClass: string;
   bgClass: string;
   borderClass: string;
@@ -82,6 +85,36 @@ export const CATEGORIES: CategoryConfig[] = [
     borderClass: 'border-violet-200 dark:border-violet-500/30',
     type: 'income',
   },
+  {
+    id: 'shopping',
+    labelKey: 'shopping',
+    icon: ShoppingBag,
+    color: '#6366f1',
+    textClass: 'text-indigo-600 dark:text-indigo-400',
+    bgClass: 'bg-indigo-100 dark:bg-indigo-500/15',
+    borderClass: 'border-indigo-200 dark:border-indigo-500/30',
+    type: 'expense',
+  },
+  {
+    id: 'healthcare',
+    labelKey: 'healthcare',
+    icon: HeartPulse,
+    color: '#14b8a6',
+    textClass: 'text-teal-600 dark:text-teal-400',
+    bgClass: 'bg-teal-100 dark:bg-teal-500/15',
+    borderClass: 'border-teal-200 dark:border-teal-500/30',
+    type: 'expense',
+  },
+  {
+    id: 'other',
+    labelKey: 'other',
+    icon: MoreHorizontal,
+    color: '#94a3b8',
+    textClass: 'text-slate-500 dark:text-slate-400',
+    bgClass: 'bg-slate-100 dark:bg-slate-700/40',
+    borderClass: 'border-slate-200 dark:border-slate-600/40',
+    type: 'both',
+  },
 ];
 
 export const CATEGORY_MAP: Record<CategoryId, CategoryConfig> = CATEGORIES.reduce(
@@ -89,8 +122,8 @@ export const CATEGORY_MAP: Record<CategoryId, CategoryConfig> = CATEGORIES.reduc
   {} as Record<CategoryId, CategoryConfig>,
 );
 
-export const EXPENSE_CATEGORIES = CATEGORIES.filter((c) => c.type === 'expense');
-export const INCOME_CATEGORIES = CATEGORIES.filter((c) => c.type === 'income');
+export const EXPENSE_CATEGORIES = CATEGORIES.filter((c) => c.type === 'expense' || c.type === 'both');
+export const INCOME_CATEGORIES = CATEGORIES.filter((c) => c.type === 'income' || c.type === 'both');
 
 export const PAYMENT_METHODS: { id: PaymentMethod; labelKey: TranslationKey }[] = [
   { id: 'cash', labelKey: 'cash' },

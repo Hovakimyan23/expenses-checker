@@ -8,6 +8,7 @@ import { ModeSelector } from '@/components/ModeSelector';
 import { AuthForm } from '@/components/AuthForm';
 import { ApprovalsView } from '@/components/ApprovalsView';
 import { TeamView } from '@/components/TeamView';
+import { BankImportModal } from '@/components/BankImportModal';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -47,10 +48,11 @@ function AppContent() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const toggleTheme = useCallback(() => {
-    setTheme((t) => {
-      const next = t === 'dark' ? 'light' : 'dark';
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
       localStorage.setItem('finch.theme', next);
       return next;
     });
@@ -239,6 +241,30 @@ function AppContent() {
     setPBudgets(SAMPLE_BUDGETS);
   }, [setPTransactions, setPBudgets]);
 
+  const importTransactions = useCallback(
+    (newTx: Transaction[]) => {
+      if (isCorporate && auth.orgId) {
+        const status = (auth.role === 'admin' || auth.role === 'manager') ? 'approved' : 'pending';
+        const payload = newTx.map((tx) => ({
+          org_id: auth.orgId,
+          user_id: auth.user?.id,
+          title: tx.title,
+          amount: tx.amount,
+          category: tx.category,
+          type: tx.type,
+          date: tx.date,
+          payment_method: tx.paymentMethod,
+          note: tx.note ?? null,
+          status,
+        }));
+        supabase.from('transactions').insert(payload).then(() => loadCorporateData());
+      } else {
+        setPTransactions((prev) => [...newTx, ...prev]);
+      }
+    },
+    [isCorporate, auth.orgId, auth.user?.id, auth.role, setPTransactions, loadCorporateData],
+  );
+
   const addBudget = useCallback(
     async (b: Budget) => {
       if (isCorporate && auth.orgId) {
@@ -309,7 +335,7 @@ function AppContent() {
 
     switch (view) {
       case 'dashboard':
-        return <Dashboard transactions={transactions} />;
+        return <Dashboard transactions={transactions} budgets={budgets} />;
       case 'transactions':
         return (
           <TransactionList
@@ -317,6 +343,7 @@ function AppContent() {
             onAdd={openAdd}
             onEdit={openEdit}
             onLoadSample={loadSample}
+            onImport={() => setImportOpen(true)}
             mode={mode ?? 'personal'}
             role={role}
             onApprove={approveTransaction}
@@ -350,6 +377,7 @@ function AppContent() {
     }
   }, [view, transactions, budgets, mode, role, cLoading, isCorporate, openAdd, openEdit, loadSample, addBudget, updateBudget, deleteBudget, approveTransaction, rejectTransaction, auth.orgId, auth.user?.id]);
 
+
   return (
     <div className="min-h-screen">
       <Header
@@ -381,6 +409,12 @@ function AppContent() {
         onDelete={deleteTransaction}
         mode={mode ?? 'personal'}
         role={role}
+      />
+
+      <BankImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={importTransactions}
       />
     </div>
   );

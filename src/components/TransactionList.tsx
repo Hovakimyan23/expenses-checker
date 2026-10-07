@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, Plus, Download, Sparkles, Pencil, ArrowUpRight, ArrowDownRight, Filter, Check, X } from 'lucide-react';
+import { Search, Plus, Download, Sparkles, Pencil, ArrowUpRight, ArrowDownRight, Filter, Check, X, Upload } from 'lucide-react';
 import { CATEGORIES, CATEGORY_MAP, PAYMENT_METHOD_KEYS } from '@/constants';
 import { formatCurrency, formatDate, downloadCSV } from '@/lib/format';
 import { useSettings } from '@/context/SettingsContext';
@@ -11,6 +11,7 @@ interface TransactionListProps {
   onAdd: () => void;
   onEdit: (t: Transaction) => void;
   onLoadSample: () => void;
+  onImport?: () => void;
   mode?: AppMode;
   role?: OrgRole | null;
   onApprove?: (id: string) => void;
@@ -22,7 +23,7 @@ type FilterCategory = 'all' | CategoryId;
 type FilterStatus = 'all' | TxStatus;
 
 export function TransactionList({
-  transactions, onAdd, onEdit, onLoadSample, mode = 'personal', role, onApprove, onReject,
+  transactions, onAdd, onEdit, onLoadSample, onImport, mode = 'personal', role, onApprove, onReject,
 }: TransactionListProps) {
   const { t, currency, language } = useSettings();
   const [search, setSearch] = useState('');
@@ -92,6 +93,12 @@ export function TransactionList({
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">{t('export')}</span>
           </button>
+          {onImport && (
+            <button onClick={onImport} className="btn-secondary border-brand-300 text-brand-700 dark:border-brand-500/30 dark:text-brand-400">
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('importStatement')}</span>
+            </button>
+          )}
           <button onClick={onAdd} className="btn-primary">
             <Plus className="h-4 w-4" />
             {t('add')}
@@ -103,7 +110,7 @@ export function TransactionList({
         <div className="card animate-scale-in p-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allTypes').replace('All ', '')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allTypes')}</label>
               <select className="input" value={filterType} onChange={(e) => setFilterType(e.target.value as FilterType)}>
                 <option value="all">{t('allTypes')}</option>
                 <option value="income">{t('income')}</option>
@@ -121,7 +128,7 @@ export function TransactionList({
             </div>
             {isCorporate && (
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allStatuses').replace('All ', '')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('allStatuses')}</label>
                 <select className="input" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}>
                   <option value="all">{t('allStatuses')}</option>
                   <option value="pending">{t('pending')}</option>

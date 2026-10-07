@@ -2,16 +2,18 @@ import { PieChart as PieIcon, BarChart3 } from 'lucide-react';
 import { SummaryCards } from '@/components/SummaryCards';
 import { SpendingPieChart } from '@/components/SpendingPieChart';
 import { MonthlyBarChart } from '@/components/MonthlyBarChart';
+import { InsightsPanel } from '@/components/InsightsPanel';
 import { CATEGORIES } from '@/constants';
 import { monthKey } from '@/lib/format';
 import { useSettings } from '@/context/SettingsContext';
-import type { Transaction, CategoryId } from '@/types';
+import type { Transaction, CategoryId, Budget } from '@/types';
 
 interface DashboardProps {
   transactions: Transaction[];
+  budgets: Budget[];
 }
 
-export function Dashboard({ transactions }: DashboardProps) {
+export function Dashboard({ transactions, budgets }: DashboardProps) {
   const { t } = useSettings();
 
   const totalIncome = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -42,6 +44,8 @@ export function Dashboard({ transactions }: DashboardProps) {
   return (
     <div className="space-y-6 animate-fade-in">
       <SummaryCards totalBalance={totalBalance} totalIncome={totalIncome} totalExpense={totalExpense} />
+
+      <InsightsPanel transactions={transactions} budgets={budgets.map((b) => ({ category: b.category, limit: b.limit }))} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-5">
