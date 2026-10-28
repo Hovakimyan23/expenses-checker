@@ -306,25 +306,8 @@ function AppContent() {
     [isCorporate, auth.orgId, setPBudgets, loadCorporateData],
   );
 
-  if (mode === null) {
-    return <ModeSelector onSelect={selectMode} />;
-  }
-
-  if (isCorporate) {
-    if (auth.loading) {
-      return (
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-        </div>
-      );
-    }
-
-    if (!auth.session) {
-      return <AuthForm />;
-    }
-  }
-
   const content = useMemo(() => {
+    if (mode === null) return null;
     if (cLoading && isCorporate) {
       return (
         <div className="flex items-center justify-center py-20">
@@ -375,8 +358,25 @@ function AppContent() {
       default:
         return null;
     }
-  }, [view, transactions, budgets, mode, role, cLoading, isCorporate, openAdd, openEdit, loadSample, addBudget, updateBudget, deleteBudget, approveTransaction, rejectTransaction, auth.orgId, auth.user?.id]);
+  }, [mode, view, transactions, budgets, role, cLoading, isCorporate, openAdd, openEdit, loadSample, addBudget, updateBudget, deleteBudget, approveTransaction, rejectTransaction, auth.orgId, auth.user?.id]);
 
+  if (mode === null) {
+    return <ModeSelector onSelect={selectMode} />;
+  }
+
+  if (isCorporate) {
+    if (auth.loading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        </div>
+      );
+    }
+
+    if (!auth.session) {
+      return <AuthForm />;
+    }
+  }
 
   return (
     <div className="min-h-screen">
