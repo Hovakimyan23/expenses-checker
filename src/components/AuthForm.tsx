@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { Wallet, Mail, Lock, Building2, Loader2 } from 'lucide-react';
+import { Wallet, Mail, Lock, Building2, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 
-export function AuthForm() {
+interface AuthFormProps {
+  onBack?: () => void;
+}
+
+export function AuthForm({ onBack }: AuthFormProps) {
   const { signIn, signUp } = useAuth();
   const { t } = useSettings();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -134,6 +138,16 @@ export function AuthForm() {
         <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
           {t('corporateDescShort')}
         </p>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mx-auto mt-4 flex items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('backToModeSelector')}
+          </button>
+        )}
       </div>
     </div>
   );

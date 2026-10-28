@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Wallet, Moon, Sun, LayoutDashboard, ArrowLeftRight, Target,
-  ClipboardCheck, Users, LogOut, ChevronDown, Building2, User,
-  Settings, Globe, Coins,
+  ClipboardCheck, Users, LogOut, ChevronDown, Building2,
+  Settings, Globe, Coins, Home,
 } from 'lucide-react';
 import type { ThemeMode, ViewId, AppMode, OrgRole, CurrencyCode, LanguageCode } from '@/types';
 import { useSettings } from '@/context/SettingsContext';
@@ -200,8 +200,8 @@ export function Header({
                     onClick={() => { setMenuOpen(false); onSwitchMode(); }}
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                   >
-                    <User className="h-4 w-4" />
-                    {t('switchToPersonal')}
+                    <Home className="h-4 w-4" />
+                    {t('mainMenu')}
                   </button>
                   <button
                     onClick={() => { setMenuOpen(false); onSignOut?.(); }}

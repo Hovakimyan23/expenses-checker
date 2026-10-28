@@ -374,7 +374,7 @@ function AppContent() {
     }
 
     if (!auth.session) {
-      return <AuthForm />;
+      return <AuthForm onBack={switchMode} />;
     }
   }
 

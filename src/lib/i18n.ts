@@ -45,7 +45,8 @@ export type TranslationKey =
   | 'shopping' | 'healthcare' | 'other'
   | 'insightsTitle' | 'insightSavingsGood' | 'insightSavingsLow'
   | 'insightOverspending' | 'insightTopCategory' | 'insightBudgetOver'
-  | 'insightBudgetNear' | 'insightMoMChange' | 'insightNoData';
+  | 'insightBudgetNear' | 'insightMoMChange' | 'insightNoData'
+  | 'backToModeSelector' | 'mainMenu';
 
 type Translations = Record<LanguageCode, Record<TranslationKey, string>>;
 
@@ -208,6 +209,8 @@ export const translations: Translations = {
     insightBudgetNear: 'You are close to your {category} budget — {amount} left.',
     insightMoMChange: 'Spending {dir} {pct}% vs last month.',
     insightNoData: 'Add transactions and budgets to see personalized financial insights.',
+    backToModeSelector: 'Back to mode selection',
+    mainMenu: 'Main Menu',
   },
   ru: {
     appTagline: 'Учёт расходов',
@@ -367,6 +370,8 @@ export const translations: Translations = {
     insightBudgetNear: 'Вы близки к бюджету на {category} — осталось {amount}.',
     insightMoMChange: 'Расходы {dir} {pct}% по сравнению с прошлым месяцем.',
     insightNoData: 'Добавьте транзакции и бюджеты, чтобы видеть персональные финансовые инсайты.',
+    backToModeSelector: 'Назад к выбору режима',
+    mainMenu: 'Главное меню',
   },
   hy: {
     appTagline: 'Ծախսումների հաշվառում',
@@ -526,5 +531,7 @@ export const translations: Translations = {
     insightBudgetNear: 'Մոտ եք {category} բյուջեի սահմանին — մնացել է {amount}։',
     insightMoMChange: 'Ծախսերը {dir} {pct}% նախորդ ամսվա համեմատ։',
     insightNoData: 'Ավելացրեք գործարքներ և բյուջեներ՝ ֆինանսական խորհուրդներ ստանալու համար։',
+    backToModeSelector: 'Հետ դեպի ռեժիմի ընտրություն',
+    mainMenu: 'Գլխավոր մենյու',
   },
 };
