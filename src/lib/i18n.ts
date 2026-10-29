@@ -46,7 +46,15 @@ export type TranslationKey =
   | 'insightsTitle' | 'insightSavingsGood' | 'insightSavingsLow'
   | 'insightOverspending' | 'insightTopCategory' | 'insightBudgetOver'
   | 'insightBudgetNear' | 'insightMoMChange' | 'insightNoData'
-  | 'backToModeSelector' | 'mainMenu';
+  | 'backToModeSelector' | 'mainMenu'
+  | 'importAnalysis' | 'importAnalysisTotalIncome' | 'importAnalysisTotalExpense'
+  | 'importAnalysisBalance' | 'importAnalysisSavingsRate'
+  | 'importAnalysisTopCategories' | 'importAnalysisInsights'
+  | 'importAnalysisSavingsGood' | 'importAnalysisSavingsLow'
+  | 'importAnalysisOverspending' | 'importAnalysisTopCategory'
+  | 'importAnalysisFoodHigh' | 'importAnalysisEntertainmentHigh'
+  | 'importAnalysisUtilitiesTip' | 'importAnalysisGeneric'
+  | 'importAnalysisViewTransactions' | 'importFile';
 
 type Translations = Record<LanguageCode, Record<TranslationKey, string>>;
 
@@ -171,8 +179,8 @@ export const translations: Translations = {
     investments: 'Investments',
     importStatement: 'Import Statement',
     importBankStatement: 'Import Bank Statement',
-    importDesc: 'Upload a CSV file exported from your bank. We\'ll automatically detect columns and categorize transactions.',
-    selectFile: 'Select CSV File',
+    importDesc: 'Upload a CSV or Excel file exported from your bank. We\'ll automatically detect columns and categorize transactions.',
+    selectFile: 'Select File',
     dragAndDrop: 'Drag and drop your CSV file here',
     orDragHere: 'or click to browse',
     parseFile: 'Parse File',
@@ -211,6 +219,23 @@ export const translations: Translations = {
     insightNoData: 'Add transactions and budgets to see personalized financial insights.',
     backToModeSelector: 'Back to mode selection',
     mainMenu: 'Main Menu',
+    importAnalysis: 'Import Analysis',
+    importAnalysisTotalIncome: 'Total Income',
+    importAnalysisTotalExpense: 'Total Expense',
+    importAnalysisBalance: 'Balance',
+    importAnalysisSavingsRate: 'Savings Rate',
+    importAnalysisTopCategories: 'Top Spending Categories',
+    importAnalysisInsights: 'Savings Tips',
+    importAnalysisSavingsGood: 'Great! You\'re saving {pct}% of your income. Keep it up!',
+    importAnalysisSavingsLow: 'Your savings rate is {pct}%. Try to save at least 20% by cutting non-essential spending.',
+    importAnalysisOverspending: 'You\'re spending more than you earn. Review your top categories and cut back where possible.',
+    importAnalysisTopCategory: 'Your biggest expense is {category}, taking up {pct}% of total spending.',
+    importAnalysisFoodHigh: 'Food accounts for {pct}% of spending. Cooking at home could save significantly.',
+    importAnalysisEntertainmentHigh: 'Entertainment takes {pct}% of spending. Consider lower-cost alternatives.',
+    importAnalysisUtilitiesTip: 'Review your utility bills — switching providers or plans could save money monthly.',
+    importAnalysisGeneric: 'Set monthly budgets for each category to keep your spending on track.',
+    importAnalysisViewTransactions: 'Review Transactions',
+    importFile: 'Import File',
   },
   ru: {
     appTagline: 'Учёт расходов',
@@ -332,8 +357,8 @@ export const translations: Translations = {
     investments: 'Инвестиции',
     importStatement: 'Импорт выписки',
     importBankStatement: 'Импорт банковской выписки',
-    importDesc: 'Загрузите CSV-файл, экспортированный из вашего банка. Мы автоматически определим столбцы и категоризируем транзакции.',
-    selectFile: 'Выбрать CSV-файл',
+    importDesc: 'Загрузите CSV или Excel файл, экспортированный из вашего банка. Мы автоматически определим столбцы и категоризируем транзакции.',
+    selectFile: 'Выбрать файл',
     dragAndDrop: 'Перетащите CSV-файл сюда',
     orDragHere: 'или нажмите для выбора',
     parseFile: 'Разобрать файл',
@@ -372,6 +397,23 @@ export const translations: Translations = {
     insightNoData: 'Добавьте транзакции и бюджеты, чтобы видеть персональные финансовые инсайты.',
     backToModeSelector: 'Назад к выбору режима',
     mainMenu: 'Главное меню',
+    importAnalysis: 'Анализ импорта',
+    importAnalysisTotalIncome: 'Общий доход',
+    importAnalysisTotalExpense: 'Общий расход',
+    importAnalysisBalance: 'Баланс',
+    importAnalysisSavingsRate: 'Норма сбережений',
+    importAnalysisTopCategories: 'Топ категорий расходов',
+    importAnalysisInsights: 'Советы по экономии',
+    importAnalysisSavingsGood: 'Отлично! Вы откладываете {pct}% дохода. Продолжайте!',
+    importAnalysisSavingsLow: 'Ваша норма сбережений {pct}%. Постарайтесь откладывать минимум 20%, сократив необязательные расходы.',
+    importAnalysisOverspending: 'Вы тратите больше, чем зарабатываете. Пересмотрите основные категории и сократите расходы.',
+    importAnalysisTopCategory: 'Ваша главная статья расходов — {category}, она занимает {pct}% всех расходов.',
+    importAnalysisFoodHigh: 'Еда составляет {pct}% расходов. Приготовление дома может существенно сэкономить.',
+    importAnalysisEntertainmentHigh: 'Развлечения занимают {pct}% расходов. Рассмотрите более доступные альтернативы.',
+    importAnalysisUtilitiesTip: 'Проверьте счета за коммуналку — смена провайдера или тарифа может сэкономить ежемесячно.',
+    importAnalysisGeneric: 'Установите месячные бюджеты для каждой категории, чтобы контролировать расходы.',
+    importAnalysisViewTransactions: 'Просмотр транзакций',
+    importFile: 'Импорт файла',
   },
   hy: {
     appTagline: 'Ծախսումների հաշվառում',
@@ -493,8 +535,8 @@ export const translations: Translations = {
     investments: 'Ներդրումներ',
     importStatement: 'Քաղվածքի ներմուծում',
     importBankStatement: 'Բանկային քաղվածքի ներմուծում',
-    importDesc: 'Վերբեռնեք ձեր բանկից արտահանված CSV ֆայլը։ Մենք ավտոմատ կերպով կհայտնաբերենք սյունակները և կկատեգորիացնենք գործարքները։',
-    selectFile: 'Ընտրել CSV ֆայլ',
+    importDesc: 'Վերբեռնեք ձեր բանկից արտահանված CSV կամ Excel ֆայլը։ Մենք ավտոմատ կերպով կհայտնաբերենք սյունակները և կկատեգորիացնենք գործարքները։',
+    selectFile: 'Ընտրել ֆայլ',
     dragAndDrop: 'Քաշեք և թողեք CSV ֆայլը այստեղ',
     orDragHere: 'կամ սեղմեք՝ ընտրելու համար',
     parseFile: 'Վերլուծել ֆայլը',
@@ -533,5 +575,22 @@ export const translations: Translations = {
     insightNoData: 'Ավելացրեք գործարքներ և բյուջեներ՝ ֆինանսական խորհուրդներ ստանալու համար։',
     backToModeSelector: 'Հետ դեպի ռեժիմի ընտրություն',
     mainMenu: 'Գլխավոր մենյու',
+    importAnalysis: 'Ներմուծման վերլուծություն',
+    importAnalysisTotalIncome: 'Ընդհանուր եկամուտ',
+    importAnalysisTotalExpense: 'Ընդհանուր ծախս',
+    importAnalysisBalance: 'Մնացորդ',
+    importAnalysisSavingsRate: 'Խնայողության տոկոս',
+    importAnalysisTopCategories: 'Ծախսերի առաջատար կատեգորիաներ',
+    importAnalysisInsights: 'Տնտեսման խորհուրդներ',
+    importAnalysisSavingsGood: 'Հիանալի՛ Եկամտի {pct}%-ը խնայում եք։ Շարունակե՛ք այսպես։',
+    importAnalysisSavingsLow: 'Խնայողության տոկոսը {pct}% է։ Փորձեք խնայել առնվազն 20%՝ կրճատելով ոչ էական ծախսերը։',
+    importAnalysisOverspending: 'Ծախսում եք ավելին, քան վաստակում եք։ Վերանայեք հիմնական կատեգորիաները և կրճատեք։',
+    importAnalysisTopCategory: 'Ամենամեծ ծախսը {category}-ն է, որը կազմում է ընդհանուր ծախսերի {pct}%-ը։',
+    importAnalysisFoodHigh: 'Սնունդը կազմում է ծախսերի {pct}%-ը։ Տան պայմաններում պատրաստելը կարող է զգալի խնայողություն տալ։',
+    importAnalysisEntertainmentHigh: 'Զվարճանքը կազմում է ծախսերի {pct}%-ը։ Դիտարկեք ավելի մատչելի տարբերակներ։',
+    importAnalysisUtilitiesTip: 'Ստուգեք կոմունալ վճարումները — մատակարարի կամ տարիֆի փոփոխությունը կարող է ամսական խնայողություն տալ։',
+    importAnalysisGeneric: 'Սահմանեք ամսական բյուջե յուրաքանչյուր կատեգորիայի համար՝ ծախսերը վերահսկելու համար։',
+    importAnalysisViewTransactions: 'Դիտել գործարքները',
+    importFile: 'Ներմուծել ֆայլ',
   },
 };

@@ -1,4 +1,5 @@
 import type { Transaction, CategoryId, TransactionType, PaymentMethod } from '@/types';
+import * as XLSX from 'xlsx';
 
 export interface ParsedRow {
   date: string;
@@ -13,6 +14,18 @@ export interface ParseResult {
   rows: ParsedRow[];
   skipped: number;
   fileName: string;
+}
+
+export function isExcelFile(fileName: string): boolean {
+  return /\.(xlsx|xls)$/i.test(fileName);
+}
+
+export function excelToCsvText(buffer: ArrayBuffer): string {
+  const wb = XLSX.read(buffer, { type: 'array' });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  if (!sheet) return '';
+  const csv = XLSX.utils.sheet_to_csv(sheet, { FS: ',', RS: '\n' });
+  return csv;
 }
 
 const CATEGORY_KEYWORDS: Record<CategoryId, string[]> = {
