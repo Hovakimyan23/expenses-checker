@@ -25,7 +25,7 @@ export function SpendingPieChart({ data }: SpendingPieProps) {
   }
 
   return (
-    <div className="h-72 w-full">
+    <div className="relative h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -56,7 +56,7 @@ export function SpendingPieChart({ data }: SpendingPieProps) {
           />
         </PieChart>
       </ResponsiveContainer>
-      <div className="-mt-[300px] flex h-72 items-center justify-center pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ paddingBottom: '40px' }}>
         <div className="text-center">
           <p className="text-xs text-gray-400 dark:text-gray-500">{t('totalSpent')}</p>
           <p className="text-lg font-bold">{formatCurrency(total, currency)}</p>

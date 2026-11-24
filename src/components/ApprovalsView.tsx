@@ -15,7 +15,7 @@ export function ApprovalsView({ transactions, onApprove, onReject }: ApprovalsVi
   const { t, currency, language } = useSettings();
   const pending = transactions.filter((tx) => tx.status === 'pending');
   const reviewed = transactions
-    .filter((tx) => tx.status === 'approved' || tx.status === 'rejected')
+    .filter((tx) => (tx.status === 'approved' || tx.status === 'rejected') && tx.reviewed_at)
     .sort((a, b) => (b.reviewed_at ?? '').localeCompare(a.reviewed_at ?? ''))
     .slice(0, 10);
 

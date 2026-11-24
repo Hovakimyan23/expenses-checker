@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import type { CurrencyCode, LanguageCode } from '@/types';
+import { CURRENCY_MAP } from '@/lib/currencies';
 import { translations, type TranslationKey } from '@/lib/i18n';
 
 interface SettingsContextValue {
@@ -18,7 +19,7 @@ const LANGUAGE_KEY = 'finch.language';
 function getStoredCurrency(): CurrencyCode {
   try {
     const c = localStorage.getItem(CURRENCY_KEY) as CurrencyCode;
-    if (c) return c;
+    if (c && c in CURRENCY_MAP) return c;
   } catch { /* ignore */ }
   return 'USD';
 }

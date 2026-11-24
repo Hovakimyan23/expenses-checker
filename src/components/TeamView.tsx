@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Users, UserPlus, Trash2, Shield, UserCog, Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/context/SettingsContext';
@@ -26,11 +26,7 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    loadMembers();
-  }, [orgId]);
-
-  async function loadMembers() {
+  const loadMembers = useCallback(async () => {
     setLoading(true);
     const { data, error: err } = await supabase
       .from('org_members')
@@ -42,7 +38,11 @@ export function TeamView({ orgId, currentUserId, onMemberChange }: TeamViewProps
       setMembers(data as OrgMember[]);
     }
     setLoading(false);
-  }
+  }, [orgId]);
+
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();

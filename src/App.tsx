@@ -237,8 +237,16 @@ function AppContent() {
   );
 
   const loadSample = useCallback(() => {
-    setPTransactions(SAMPLE_TRANSACTIONS);
-    setPBudgets(SAMPLE_BUDGETS);
+    setPTransactions((prev) => {
+      const existingIds = new Set(prev.map((t) => t.id));
+      const toAdd = SAMPLE_TRANSACTIONS.filter((t) => !existingIds.has(t.id));
+      return [...toAdd, ...prev];
+    });
+    setPBudgets((prev) => {
+      const existingCats = new Set(prev.map((b) => b.category));
+      const toAdd = SAMPLE_BUDGETS.filter((b) => !existingCats.has(b.category));
+      return [...prev, ...toAdd];
+    });
   }, [setPTransactions, setPBudgets]);
 
   const importTransactions = useCallback(
